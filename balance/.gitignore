@@ -6,9 +6,10 @@
 .DS_Store
 .atom/
 .buildlog/
-.history
+.historyf
 .svn/
 migrate_working_dir/
+.fvm/flutter_sdk
 
 # IntelliJ related
 *.iml
