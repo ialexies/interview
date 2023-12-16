@@ -1,6 +1,7 @@
 import 'package:balance/core/database/dao/groups_dao.dart';
 import 'package:balance/core/database/dao/transactions_dao.dart';
 import 'package:balance/main.dart';
+import 'package:balance/ui/group/group_transaction_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -108,45 +109,8 @@ class _GroupPageState extends State<GroupPage> {
             const Text('Transactions'),
             // Todo: Separate this stream so that we can dispose properly and handle
             // Todo: Return Transaction for specific group only
-            // Todo: Refactor and put in a separate widget
             // Todo: Update the total balance of group when adding transaction
-            StreamBuilder(
-              stream: _transactionsDao.watch(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return const Text("Loading...");
-                }
-                return Container(
-                  //decoration with border and amber background
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: Colors.amber[100],
-                  ),
-                  height: 300,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Expanded(
-                        child: ListView.builder(
-                          itemCount: snapshot.requireData.length,
-                          itemBuilder: (context, index) {
-                            snapshot.requireData.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-
-                            return ListTile(
-                              title: Text(snapshot.requireData[index].amount.toString()),
-                              subtitle: Text(snapshot.requireData[index].createdAt.toString()),
-                              onTap: () {
-                                // GoRouterHelper(context).push("/groups/${snapshot.requireData[index].id}");
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
+            GroupTransaction(transactionsDao: _transactionsDao),
           ],
         ),
       );
