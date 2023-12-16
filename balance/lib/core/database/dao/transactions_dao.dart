@@ -26,20 +26,19 @@ class TransactionssDao extends DatabaseAccessor<Database> with _$TransactionssDa
   // Function to return list of transactions
   Future<List<Transaction>> getAllTransactions() => select(transactions).get();
 
-  // Future adjustBalance(int balance, String groupId) async {
-  //   final companion = TransactionsCompanion(balance: Value(balance));
-  //   return (update(transactions)..where((tbl) => tbl.id.equals(groupId))).write(companion);
-  // }
-
   Stream<List<Transaction>> watch() => select(transactions).watch();
 
-  Stream<Transaction?> watchGroup(String transactionId) {
+  Stream<List<Transaction>?> watchGroupTransactions(String groupId) {
+    return (select(transactions)..where((tbl) => tbl.groupId.equals(groupId))).watch();
+    // return all transactions which is equal to trnsactionId
+    // return (select(transactions)..where((tbl) => tbl.groupId.equals(groupId))).get();
+
     // return (select(transactions)..where((tbl) => tbl.id.equals(transactionId))).watchSingleOrNull();
 
     // return transactions sort by date
-    return (select(transactions)
-          ..where((tbl) => tbl.id.equals(transactionId))
-          ..orderBy([(t) => OrderingTerm(expression: t.createdAt, mode: OrderingMode.desc)]))
-        .watchSingleOrNull();
+    // return (select(transactions)
+    //       ..where((tbl) => tbl.id.equals(transactionId))
+    //       ..orderBy([(t) => OrderingTerm(expression: t.createdAt, mode: OrderingMode.desc)]))
+    //     .watchSingleOrNull();
   }
 }

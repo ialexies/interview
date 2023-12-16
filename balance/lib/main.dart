@@ -1,6 +1,7 @@
 import 'package:balance/main.config.dart';
 import 'package:balance/router.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 
@@ -20,16 +21,18 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: MaterialApp.router(
-        routeInformationProvider: appRouter.routeInformationProvider,
-        routeInformationParser: appRouter.routeInformationParser,
-        routerDelegate: appRouter.routerDelegate,
+    return ScreenUtilInit(
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          useMaterial3: true,
+        ),
+        home: MaterialApp.router(
+          routeInformationProvider: appRouter.routeInformationProvider,
+          routeInformationParser: appRouter.routeInformationParser,
+          routerDelegate: appRouter.routerDelegate,
+        ),
       ),
     );
   }
