@@ -26,19 +26,33 @@ class TransactionssDao extends DatabaseAccessor<Database> with _$TransactionssDa
   // Function to return list of transactions
   Future<List<Transaction>> getAllTransactions() => select(transactions).get();
 
+  // Function to return Stream list of transactions
   Stream<List<Transaction>> watch() => select(transactions).watch();
 
+  // Function to return Stream list of transactions for a group
   Stream<List<Transaction>?> watchGroupTransactions(String groupId) {
-    return (select(transactions)..where((tbl) => tbl.groupId.equals(groupId))).watch();
-    // return all transactions which is equal to trnsactionId
-    // return (select(transactions)..where((tbl) => tbl.groupId.equals(groupId))).get();
+    return (select(transactions)
+          ..where(
+            (tbl) => tbl.groupId.equals(groupId),
+          ))
+        .watch();
+  }
 
-    // return (select(transactions)..where((tbl) => tbl.id.equals(transactionId))).watchSingleOrNull();
+  // Function to delete a transaction in a group
+  Future deleteTransaction(String transactionId) {
+    return (delete(transactions)
+          ..where(
+            (tbl) => tbl.id.equals(transactionId),
+          ))
+        .go();
+  }
 
-    // return transactions sort by date
-    // return (select(transactions)
-    //       ..where((tbl) => tbl.id.equals(transactionId))
-    //       ..orderBy([(t) => OrderingTerm(expression: t.createdAt, mode: OrderingMode.desc)]))
-    //     .watchSingleOrNull();
+  // Function to update a transaction in a group
+  updateTransaction(String id, int parse) {
+    return (update(transactions)..where((tbl) => tbl.id.equals(id))).write(
+      TransactionsCompanion(
+        amount: Value(parse),
+      ),
+    );
   }
 }
