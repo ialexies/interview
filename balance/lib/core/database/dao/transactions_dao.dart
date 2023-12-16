@@ -34,6 +34,12 @@ class TransactionssDao extends DatabaseAccessor<Database> with _$TransactionssDa
   Stream<List<Transaction>> watch() => select(transactions).watch();
 
   Stream<Transaction?> watchGroup(String transactionId) {
-    return (select(transactions)..where((tbl) => tbl.id.equals(transactionId))).watchSingleOrNull();
+    // return (select(transactions)..where((tbl) => tbl.id.equals(transactionId))).watchSingleOrNull();
+
+    // return transactions sort by date
+    return (select(transactions)
+          ..where((tbl) => tbl.id.equals(transactionId))
+          ..orderBy([(t) => OrderingTerm(expression: t.createdAt, mode: OrderingMode.desc)]))
+        .watchSingleOrNull();
   }
 }

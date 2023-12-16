@@ -73,31 +73,48 @@ class _GroupPageState extends State<GroupPage> {
                       ),
                       TextButton(
                           onPressed: () {
-                            // final amount = int.parse(_expenseController.text);
-                            // final balance = snapshot.data?.balance ?? 0;
-                            // _groupsDao.adjustBalance(balance - amount, widget.groupId);
-                            // _expenseController.text = "";
-
-                            // add new entry in transaction table of transactions.dart
-                            _transactionsDao.insert(
-                              widget.groupId,
-                              int.parse(_expenseController.text),
-                            );
-                            print(_transactionsDao.getAllTransactions().toString());
+                            try {
+                              _transactionsDao.insert(
+                                widget.groupId,
+                                int.parse(_expenseController.text),
+                              );
+                              print(_transactionsDao.getAllTransactions().toString());
+                            } catch (e) {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text("Wrong input"),
+                                    content: const Text("Please enter a valid amount"),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text("OK"),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            }
                           },
-                          child: Text("Add expense")),
+                          child: const Text("Add expense")),
                     ]),
                   ],
                 );
               },
             ),
-
-            // StreamBulder that get value from transaction table
+            const Text('Transactions'),
+            // Todo: Separate this stream so that we can dispose properly and handle
+            // Todo: Return Transaction for specific group only
+            // Todo: Refactor and put in a separate widget
+            // Todo: Update the total balance of group when adding transaction
             StreamBuilder(
               stream: _transactionsDao.watch(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
-                  return Text("Loading...");
+                  return const Text("Loading...");
                 }
                 return Container(
                   //decoration with border and amber background
@@ -111,14 +128,19 @@ class _GroupPageState extends State<GroupPage> {
                     children: [
                       Expanded(
                         child: ListView.builder(
-                            itemCount: snapshot.requireData.length,
-                            itemBuilder: (context, index) => ListTile(
-                                  title: Text(snapshot.requireData[index].amount.toString()),
-                                  subtitle: Text(snapshot.requireData[index].createdAt.toString()),
-                                  onTap: () {
-                                    // GoRouterHelper(context).push("/groups/${snapshot.requireData[index].id}");
-                                  },
-                                )),
+                          itemCount: snapshot.requireData.length,
+                          itemBuilder: (context, index) {
+                            snapshot.requireData.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+                            return ListTile(
+                              title: Text(snapshot.requireData[index].amount.toString()),
+                              subtitle: Text(snapshot.requireData[index].createdAt.toString()),
+                              onTap: () {
+                                // GoRouterHelper(context).push("/groups/${snapshot.requireData[index].id}");
+                              },
+                            );
+                          },
+                        ),
                       ),
                     ],
                   ),
