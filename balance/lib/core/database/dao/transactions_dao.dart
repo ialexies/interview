@@ -11,12 +11,13 @@ part 'transactions_dao.g.dart';
 class TransactionssDao extends DatabaseAccessor<Database> with _$TransactionssDaoMixin {
   TransactionssDao(super.db);
 
-  Future insert(String groupId, int amount) {
+  Future insert(String groupId, int amount, TransactionType transactionType) {
     // return into(transactions).insert(TransactionsCompanion.insert(id: const Uuid().v1(), id: 'test'));
     return into(transactions).insert(
       TransactionsCompanion.insert(
         id: const Uuid().v1(),
         createdAt: DateTime.now(),
+        transactionType: Value(transactionType),
         amount: Value(amount),
         groupId: groupId,
       ),
@@ -31,11 +32,20 @@ class TransactionssDao extends DatabaseAccessor<Database> with _$TransactionssDa
 
   // Function to return Stream list of transactions for a group
   Stream<List<Transaction>?> watchGroupTransactions(String groupId) {
+    // return where groupId is groupId and transactionType are same
     return (select(transactions)
           ..where(
             (tbl) => tbl.groupId.equals(groupId),
           ))
         .watch();
+    // return (select(transactions)
+    //       ..where(
+    //         (tbl) => tbl.groupId.equals(groupId),
+    //       )
+    //       ..where(
+    //         (tbl) => tbl.transactionType.equals(transactionType),
+    //       ))
+    //     .watch();
   }
 
   // Function to delete a transaction in a group
@@ -57,10 +67,13 @@ class TransactionssDao extends DatabaseAccessor<Database> with _$TransactionssDa
   }
 
   // Function to return sum of all amount of transactions in a group
-  Stream<int> groupTransactionTotalAmount(String groupId) {
+  Stream<int> groupTransactionTotal(String groupId, TransactionType transactionType) {
     return (select(transactions)
           ..where(
             (tbl) => tbl.groupId.equals(groupId),
+          )
+          ..where(
+            (tbl) => tbl.transactionType.equals(transactionType.index),
           ))
         .watch()
         .map((event) => event.map((e) => e.amount).toList())
