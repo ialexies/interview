@@ -70,4 +70,31 @@ class TransactionssDao extends DatabaseAccessor<Database> with _$TransactionssDa
         .map((event) => event.map((e) => e.amount).toList())
         .map((event) => event.fold<int>(0, (previousValue, element) => previousValue + element));
   }
+
+  Future<int> getBalance({required String groupId}) async {
+    final List<Transaction> totIncome = await (select(transactions)
+          ..where(
+            (tbl) => tbl.groupId.equals(groupId),
+          )
+          ..where(
+            (tbl) => tbl.transactionType.equals(TransactionType.income.index),
+          ))
+        .get();
+    final List<Transaction> totExpenses = await (select(transactions)
+          ..where(
+            (tbl) => tbl.groupId.equals(groupId),
+          )
+          ..where(
+            (tbl) => tbl.transactionType.equals(TransactionType.expense.index),
+          ))
+        .get();
+
+    int totalIncome = totIncome.fold<int>(0, (previousValue, element) => previousValue + element.amount);
+    int totalExpenses = totExpenses.fold<int>(0, (previousValue, element) => previousValue + element.amount);
+
+    final totalBalance = totalIncome - totalExpenses;
+
+    // print(totIncome);
+    return totalBalance;
+  }
 }

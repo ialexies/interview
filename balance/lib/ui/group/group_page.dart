@@ -97,7 +97,7 @@ class _GroupPageState extends State<GroupPage> {
           ),
         ),
         TextButton(
-          onPressed: () {
+          onPressed: () async {
             final controller = type == TransactionType.income ? _incomeController : _expenseController;
             final value = controller.text;
 
@@ -116,6 +116,8 @@ class _GroupPageState extends State<GroupPage> {
                 int.parse(value),
                 type,
               );
+
+              await _updateGroupBalance();
 
               controller.clear();
 
@@ -163,6 +165,11 @@ class _GroupPageState extends State<GroupPage> {
         ),
       ],
     );
+  }
+
+  Future<void> _updateGroupBalance() async {
+    int totalBalance = await _transactionsDao.getBalance(groupId: widget.groupId);
+    _groupsDao.adjustBalance(totalBalance, widget.groupId);
   }
 
   InputDecoration txtFieldDecor() {

@@ -1,5 +1,9 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'package:balance/core/database/dao/groups_dao.dart';
 import 'package:balance/core/database/dao/transactions_dao.dart';
 import 'package:balance/core/database/tables/transactions.dart';
+import 'package:balance/main.dart';
 import 'package:balance/ui/group/group_transaction_page.dart';
 import 'package:balance/ui/widgets/formatted_date.dart';
 import 'package:balance/ui/widgets/formatted_time.dart';
@@ -21,6 +25,7 @@ class TransactionListPerType extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    late final GroupsDao _groupsDao = getIt.get<GroupsDao>();
     return StreamBuilder(
       stream: _transactionsDao.watchGroupTransactions(
         widget.groupId,
@@ -32,6 +37,10 @@ class TransactionListPerType extends StatelessWidget {
 
         /// Sorts the data in the snapshot based on the createdAt property in descending order
         snapshot.requireData!.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        Future<void> _updateGroupBalance() async {
+          int totalBalance = await _transactionsDao.getBalance(groupId: widget.groupId);
+          _groupsDao.adjustBalance(totalBalance, widget.groupId);
+        }
 
         return Container(
           margin: EdgeInsets.all(15.sp),
@@ -83,6 +92,8 @@ class TransactionListPerType extends StatelessWidget {
                             IconButton(
                               onPressed: () async {
                                 transactionUpdateVal.text = data.amount.toString();
+
+                                await _updateGroupBalance();
                                 await showDialog(
                                   context: context,
                                   builder: (context) => AlertDialog(
@@ -97,12 +108,19 @@ class TransactionListPerType extends StatelessWidget {
                                     actions: [
                                       TextButton(
                                         onPressed: () async {
-                                          if (transactionUpdateVal.text.isEmpty) return;
-                                          final text = transactionUpdateVal.text;
-                                          await _transactionsDao.updateTransaction(
-                                            data.id,
-                                            int.parse(text),
-                                          );
+                                          try {
+                                            if (transactionUpdateVal.text.isEmpty) return;
+                                            final text = transactionUpdateVal.text;
+                                            await _transactionsDao.updateTransaction(
+                                              data.id,
+                                              int.parse(text),
+                                            );
+
+                                            await _updateGroupBalance();
+                                          } catch (e) {
+                                            print(e);
+                                          }
+
                                           Navigator.pop(context);
                                         },
                                         child: const Text("Save"),
@@ -117,6 +135,8 @@ class TransactionListPerType extends StatelessWidget {
                             IconButton(
                               onPressed: () async {
                                 await _transactionsDao.deleteTransaction(snapshot.requireData![index].id);
+
+                                await _updateGroupBalance();
                               },
                               icon: const Icon(Icons.delete),
                               visualDensity: VisualDensity.compact,

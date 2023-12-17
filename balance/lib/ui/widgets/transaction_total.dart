@@ -24,8 +24,8 @@ class TransactionTotal extends StatefulWidget {
 
 class _TransactionTotalState extends State<TransactionTotal> {
   Stream<int>? groupTransactionTotal;
-  int? _incomeTotal;
-  int? _expenseTotal;
+  int? _incomeTotal = 0;
+  int? _expenseTotal = 0;
 
   @override
   void initState() {
