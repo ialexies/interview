@@ -101,8 +101,10 @@ class _GroupPageState extends State<GroupPage> {
             final controller = type == TransactionType.income ? _incomeController : _expenseController;
             final value = controller.text;
 
+            // prevent empty values
             if (value.isEmpty) return;
 
+            // prevent multiple clicks
             if (isGroupPageLoading) return;
             setState(() {
               isGroupPageLoading = true;

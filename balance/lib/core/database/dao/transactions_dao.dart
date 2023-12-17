@@ -12,7 +12,6 @@ class TransactionssDao extends DatabaseAccessor<Database> with _$TransactionssDa
   TransactionssDao(super.db);
 
   Future insert(String groupId, int amount, TransactionType transactionType) {
-    // return into(transactions).insert(TransactionsCompanion.insert(id: const Uuid().v1(), id: 'test'));
     return into(transactions).insert(
       TransactionsCompanion.insert(
         id: const Uuid().v1(),
@@ -38,14 +37,6 @@ class TransactionssDao extends DatabaseAccessor<Database> with _$TransactionssDa
             (tbl) => tbl.groupId.equals(groupId),
           ))
         .watch();
-    // return (select(transactions)
-    //       ..where(
-    //         (tbl) => tbl.groupId.equals(groupId),
-    //       )
-    //       ..where(
-    //         (tbl) => tbl.transactionType.equals(transactionType),
-    //       ))
-    //     .watch();
   }
 
   // Function to delete a transaction in a group
