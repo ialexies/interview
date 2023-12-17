@@ -13,7 +13,7 @@ class GroupPage extends StatefulWidget {
   const GroupPage(this.groupId, {super.key});
 
   @override
-  State<StatefulWidget> createState() => _GroupPageState();
+  State<GroupPage> createState() => _GroupPageState();
 }
 
 class _GroupPageState extends State<GroupPage> {
@@ -23,87 +23,85 @@ class _GroupPageState extends State<GroupPage> {
   final _incomeController = TextEditingController();
   final _expenseController = TextEditingController();
   bool isGroupPageLoading = false;
-  //final _transactionController = TextEditingController();
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-          title: const Text("Group details"),
-        ),
-        body: Stack(
-          children: [
-            Column(
-              children: [
-                TransactionTotal(
-                  groupId: widget.groupId,
-                  transactionsDao: _transactionsDao,
-                  transactionUpdateVal: _incomeController,
-                ),
-                Container(
-                  margin: EdgeInsets.all(15.sp),
-                  padding: EdgeInsets.symmetric(horizontal: 20.sp, vertical: 10.sp),
-                  height: .16.sh,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: StreamBuilder(
-                    stream: _groupsDao.watchGroup(widget.groupId),
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) {
-                        return const Text("Loading...");
-                      }
-                      return Column(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          _groupAction(context, type: TransactionType.income),
-                          SizedBox(
-                            height: 10.sp,
-                          ),
-                          _groupAction(context, type: TransactionType.expense),
-                        ],
-                      );
-                    },
-                  ),
-                ),
-                GroupTransaction(groupId: widget.groupId),
-              ],
-            ),
-            // Loading indicator
-            if (isGroupPageLoading)
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Group details"),
+      ),
+      body: Stack(
+        children: [
+          Column(
+            children: [
+              TransactionTotal(
+                groupId: widget.groupId,
+                transactionsDao: _transactionsDao,
+                transactionUpdateVal: _incomeController,
+              ),
               Container(
-                color: Colors.black.withOpacity(0.8),
-                child: const Center(
-                  child: CircularProgressIndicator(),
+                margin: EdgeInsets.all(15.sp),
+                padding: EdgeInsets.symmetric(horizontal: 20.sp, vertical: 10.sp),
+                height: .16.sh,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: StreamBuilder(
+                  stream: _groupsDao.watchGroup(widget.groupId),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Text("Loading...");
+                    }
+                    return Column(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        _groupAction(context, type: TransactionType.income),
+                        SizedBox(
+                          height: 10.sp,
+                        ),
+                        _groupAction(context, type: TransactionType.expense),
+                      ],
+                    );
+                  },
                 ),
               ),
-          ],
-        ),
-      );
+              GroupTransaction(groupId: widget.groupId),
+            ],
+          ),
+          if (isGroupPageLoading)
+            Container(
+              color: Colors.black.withOpacity(0.8),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 
   Row _groupAction(BuildContext context, {required TransactionType type}) {
-    return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-      SizedBox(
-        width: 150.sp,
-        child: Expanded(
-          child: TextFormField(
-            controller: type == TransactionType.income ? _incomeController : _expenseController,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r"[0-9]"))],
-            decoration: txtFieldDecor(),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        SizedBox(
+          width: 150.sp,
+          child: Expanded(
+            child: TextFormField(
+              controller: type == TransactionType.income ? _incomeController : _expenseController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r"[0-9]"))],
+              decoration: txtFieldDecor(),
+            ),
           ),
         ),
-      ),
-      TextButton(
+        TextButton(
           onPressed: () {
-            switch (type) {
-              case TransactionType.income:
-                if (_incomeController.text.isEmpty) return;
-                break;
-              case TransactionType.expense:
-                if (_expenseController.text.isEmpty) return;
-                break;
-            }
+            final controller = type == TransactionType.income ? _incomeController : _expenseController;
+            final value = controller.text;
+
+            if (value.isEmpty) return;
 
             if (isGroupPageLoading) return;
             setState(() {
@@ -113,22 +111,11 @@ class _GroupPageState extends State<GroupPage> {
             try {
               _transactionsDao.insert(
                 widget.groupId,
-                int.parse(
-                  type == TransactionType.income ? _incomeController.text : _expenseController.text,
-                ),
+                int.parse(value),
                 type,
               );
 
-              switch (type) {
-                case TransactionType.income:
-                  _incomeController.clear();
-                  break;
-                case TransactionType.expense:
-                  _expenseController.clear();
-                  break;
-              }
-
-              _incomeController.clear();
+              controller.clear();
 
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -145,6 +132,8 @@ class _GroupPageState extends State<GroupPage> {
                   ),
                 ),
               );
+              // close keyboard
+              FocusScope.of(context).unfocus();
             } catch (e) {
               showDialog(
                 context: context,
@@ -168,8 +157,10 @@ class _GroupPageState extends State<GroupPage> {
               isGroupPageLoading = false;
             });
           },
-          child: Text("Add ${type == TransactionType.income ? 'Income' : 'Expense'}")),
-    ]);
+          child: Text("Add ${type == TransactionType.income ? 'Income' : 'Expense'}"),
+        ),
+      ],
+    );
   }
 
   InputDecoration txtFieldDecor() {

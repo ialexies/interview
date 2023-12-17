@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 class GroupTransaction extends StatefulWidget {
   final String groupId;
+
   const GroupTransaction({super.key, required this.groupId});
 
   @override
@@ -20,7 +21,10 @@ class _GroupTransactionState extends State<GroupTransaction> {
     return Column(
       children: [
         TransactionListPerType(
-            transactionsDao: _transactionsDao, widget: widget, transactionUpdateVal: transactionUpdateVal),
+          transactionsDao: _transactionsDao,
+          widget: widget,
+          transactionUpdateVal: transactionUpdateVal,
+        ),
       ],
     );
   }

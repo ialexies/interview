@@ -1,8 +1,6 @@
 import 'dart:async';
-
 import 'package:balance/core/database/dao/transactions_dao.dart';
 import 'package:balance/core/database/tables/transactions.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -30,11 +28,10 @@ class _TransactionTotalState extends State<TransactionTotal> {
   int? _expenseTotal;
 
   @override
-  Widget build(BuildContext context) {
-    // valuue subscription  widget._transactionsDao.groupTransactionTotal(widget.groupId, TransactionType.income);
-    StreamSubscription<int?> subscriptionTotalIncome =
-        widget._transactionsDao.groupTransactionTotal(widget.groupId, TransactionType.income).listen((incomeTotal) {
-      // Update widget with 'incomeTotal' value
+  void initState() {
+    super.initState();
+
+    widget._transactionsDao.groupTransactionTotal(widget.groupId, TransactionType.income).listen((incomeTotal) {
       if (mounted) {
         setState(() {
           _incomeTotal = incomeTotal;
@@ -42,24 +39,17 @@ class _TransactionTotalState extends State<TransactionTotal> {
       }
     });
 
-    // expenses subscription
-    StreamSubscription<int?> subscriptionTotalExpenses =
-        widget._transactionsDao.groupTransactionTotal(widget.groupId, TransactionType.expense).listen((expenseTotal) {
-      // Update widget with 'expenseTotal' value
+    widget._transactionsDao.groupTransactionTotal(widget.groupId, TransactionType.expense).listen((expenseTotal) {
       if (mounted) {
         setState(() {
           _expenseTotal = expenseTotal;
         });
       }
     });
+  }
 
-    @override
-    void dispose() {
-      subscriptionTotalIncome.cancel();
-      subscriptionTotalExpenses.cancel();
-      super.dispose();
-    }
-
+  @override
+  Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(15.sp),
       width: double.maxFinite,
