@@ -75,16 +75,16 @@ class _TransactionTotalState extends State<TransactionTotal> {
           DataRowBuilder(
             name: 'Balance',
             val: int.parse(_incomeTotal.toString()) - int.parse(_expenseTotal.toString()) < 0
-                ? '-\$${(_incomeTotal! - _expenseTotal!).abs()}'
-                : '\$${(_incomeTotal! - _expenseTotal!).abs()}',
+                ? '-\$  ${(_incomeTotal! - _expenseTotal!).abs()}'
+                : '\$  ${(_incomeTotal! - _expenseTotal!).abs()}',
           ),
           DataRowBuilder(
             name: 'Income',
-            val: (_incomeTotal!).toString(),
+            val: '\$   ${(_incomeTotal!).toString()}',
           ),
           DataRowBuilder(
             name: 'Expenses',
-            val: (_expenseTotal!).toString(),
+            val: '\$   ${(_expenseTotal!).toString()}',
           ),
         ],
       ),

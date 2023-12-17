@@ -22,6 +22,7 @@ class _GroupPageState extends State<GroupPage> {
 
   final _incomeController = TextEditingController();
   final _expenseController = TextEditingController();
+  bool isGroupPageLoading = false;
   //final _transactionController = TextEditingController();
 
   @override
@@ -29,147 +30,163 @@ class _GroupPageState extends State<GroupPage> {
         appBar: AppBar(
           title: const Text("Group details"),
         ),
-        body: Column(
+        body: Stack(
           children: [
-            TransactionTotal(
-              groupId: widget.groupId,
-              transactionsDao: _transactionsDao,
-              transactionUpdateVal: _incomeController,
-            ),
-            Container(
-              margin: EdgeInsets.all(15.sp),
-              padding: EdgeInsets.symmetric(horizontal: 20.sp, vertical: 10.sp),
-              height: .16.sh,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: StreamBuilder(
-                stream: _groupsDao.watchGroup(widget.groupId),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return const Text("Loading...");
-                  }
-                  return Column(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      // Row(children: [
-                      //   Expanded(
-                      //     child: TextFormField(
-                      //       controller: _incomeController,
-                      //       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      //       inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r"[0-9]"))],
-                      //       decoration: const InputDecoration(
-                      //         contentPadding: EdgeInsets.symmetric(vertical: 10),
-                      //         suffixText: "\$",
-                      //       ),
-                      //     ),
-                      //   ),
-                      //   TextButton(
-                      //       onPressed: () {
-                      //         final amount = int.parse(_incomeController.text);
-                      //         final balance = snapshot.data?.balance ?? 0;
-                      //         _groupsDao.adjustBalance(balance + amount, widget.groupId);
-                      //         _incomeController.text = "";
-                      //       },
-                      //       child: Text("Add income")),
-                      // ]),
-                      Row(children: [
-                        Expanded(
-                          child: TextFormField(
-                            controller: _expenseController,
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r"[0-9]"))],
-                            decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.symmetric(vertical: 10),
-                              suffixText: "\$",
-                            ),
+            Column(
+              children: [
+                TransactionTotal(
+                  groupId: widget.groupId,
+                  transactionsDao: _transactionsDao,
+                  transactionUpdateVal: _incomeController,
+                ),
+                Container(
+                  margin: EdgeInsets.all(15.sp),
+                  padding: EdgeInsets.symmetric(horizontal: 20.sp, vertical: 10.sp),
+                  height: .16.sh,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: StreamBuilder(
+                    stream: _groupsDao.watchGroup(widget.groupId),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const Text("Loading...");
+                      }
+                      return Column(
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          _groupAction(context, type: TransactionType.Income),
+                          SizedBox(
+                            height: 10.sp,
                           ),
-                        ),
-                        TextButton(
-                            onPressed: () {
-                              try {
-                                _transactionsDao.insert(
-                                  widget.groupId,
-                                  int.parse(_expenseController.text),
-                                  TransactionType.Income,
-                                );
-                                _incomeController.clear();
-                                // print(_transactionsDao.getAllTransactions().toString());
-                              } catch (e) {
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: const Text("Wrong input"),
-                                      content: const Text("Please enter a valid amount"),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.of(context).pop();
-                                          },
-                                          child: const Text("OK"),
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                );
-                              }
-                            },
-                            child: const Text("Add Income")),
-                      ]),
-                      Row(children: [
-                        Expanded(
-                          child: TextFormField(
-                            controller: _expenseController,
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r"[0-9]"))],
-                            decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.symmetric(vertical: 10),
-                              suffixText: "\$",
-                            ),
-                          ),
-                        ),
-                        TextButton(
-                            onPressed: () {
-                              try {
-                                _transactionsDao.insert(
-                                  widget.groupId,
-                                  int.parse(
-                                    _expenseController.text,
-                                  ),
-                                  TransactionType.Expense,
-                                );
-                                _expenseController.clear();
-                              } catch (e) {
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: const Text("Wrong input"),
-                                      content: const Text("Please enter a valid amount"),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.of(context).pop();
-                                          },
-                                          child: const Text("OK"),
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                );
-                              }
-                            },
-                            child: const Text("Add expense")),
-                      ]),
-                    ],
-                  );
-                },
-              ),
+                          _groupAction(context, type: TransactionType.Expense),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+                GroupTransaction(groupId: widget.groupId),
+              ],
             ),
-            GroupTransaction(groupId: widget.groupId),
+            // Loading indicator
+            if (isGroupPageLoading)
+              Container(
+                color: Colors.black.withOpacity(0.8),
+                child: const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
           ],
         ),
       );
+
+  Row _groupAction(BuildContext context, {required TransactionType type}) {
+    return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+      SizedBox(
+        width: 150.sp,
+        child: Expanded(
+          child: TextFormField(
+            controller: type == TransactionType.Income ? _incomeController : _expenseController,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r"[0-9]"))],
+            decoration: txtFieldDecor(),
+          ),
+        ),
+      ),
+      TextButton(
+          onPressed: () {
+            switch (type) {
+              case TransactionType.Income:
+                if (_incomeController.text.isEmpty) return;
+                break;
+              case TransactionType.Expense:
+                if (_expenseController.text.isEmpty) return;
+                break;
+            }
+
+            if (isGroupPageLoading) return;
+            setState(() {
+              isGroupPageLoading = true;
+            });
+
+            try {
+              _transactionsDao.insert(
+                widget.groupId,
+                int.parse(
+                  type == TransactionType.Income ? _incomeController.text : _expenseController.text,
+                ),
+                type,
+              );
+
+              switch (type) {
+                case TransactionType.Income:
+                  _incomeController.clear();
+                  break;
+                case TransactionType.Expense:
+                  _expenseController.clear();
+                  break;
+              }
+
+              _incomeController.clear();
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Transaction added'),
+                  backgroundColor: Colors.amber,
+                  duration: Duration(seconds: 1),
+                  behavior: SnackBarBehavior.floating,
+                  margin: EdgeInsets.all(10),
+                  padding: EdgeInsets.all(10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(10),
+                    ),
+                  ),
+                ),
+              );
+            } catch (e) {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text("Error"),
+                    content: Text(e.toString()),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text("OK"),
+                      ),
+                    ],
+                  );
+                },
+              );
+            }
+            setState(() {
+              isGroupPageLoading = false;
+            });
+          },
+          child: Text("Add ${type == TransactionType.Income ? 'Income' : 'Expense'}")),
+    ]);
+  }
+
+  InputDecoration txtFieldDecor() {
+    return const InputDecoration(
+      contentPadding: EdgeInsets.symmetric(
+        vertical: 10,
+        horizontal: 10,
+      ),
+      prefixText: "\$  ",
+      border: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: Colors.grey,
+        ),
+        borderRadius: BorderRadius.all(
+          Radius.circular(10),
+        ),
+      ),
+    );
+  }
 }

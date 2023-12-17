@@ -1,4 +1,5 @@
 import 'package:balance/core/database/dao/transactions_dao.dart';
+import 'package:balance/core/database/tables/transactions.dart';
 import 'package:balance/ui/group/group_transaction_page.dart';
 import 'package:balance/ui/widgets/formatted_date.dart';
 import 'package:balance/ui/widgets/formatted_time.dart';
@@ -50,7 +51,14 @@ class TransactionListPerType extends StatelessWidget {
                     return Card(
                       child: ListTile(
                         dense: true,
-                        title: Text(transactionType),
+                        title: Text(
+                          transactionType,
+                          style: TextStyle(
+                            color: data.transactionType == TransactionType.Expense ? Colors.red : Colors.green,
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -58,12 +66,15 @@ class TransactionListPerType extends StatelessWidget {
                             FormattedTime(data: data),
                           ],
                         ),
-                        leading: Text(
-                          '\$ ${data.amount}',
-                          style: TextStyle(
-                            color: data.amount > 0 ? Colors.green : Colors.red,
-                            fontSize: 15.sp,
-                            fontWeight: FontWeight.bold,
+                        leading: SizedBox(
+                          width: 50.sp,
+                          child: Text(
+                            '\$ ${data.amount}',
+                            style: TextStyle(
+                              color: data.amount > 0 ? Colors.green : Colors.red,
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                         trailing: Row(
@@ -75,7 +86,9 @@ class TransactionListPerType extends StatelessWidget {
                                 await showDialog(
                                   context: context,
                                   builder: (context) => AlertDialog(
-                                    title: const Text("Edit transaction"),
+                                    title: const Text(
+                                      "Edit transaction",
+                                    ),
                                     content: TextField(
                                       controller: transactionUpdateVal,
                                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
