@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
 
-enum TransactionType { Expense, Income }
+enum TransactionType { expense, income }
 
 class Transactions extends Table {
   TextColumn get id => text()();

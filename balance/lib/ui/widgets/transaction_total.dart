@@ -28,13 +28,12 @@ class _TransactionTotalState extends State<TransactionTotal> {
   Stream<int>? groupTransactionTotal;
   int? _incomeTotal;
   int? _expenseTotal;
-  int? _balance = -30;
 
   @override
   Widget build(BuildContext context) {
-    // valuue subscription  widget._transactionsDao.groupTransactionTotal(widget.groupId, TransactionType.Income);
+    // valuue subscription  widget._transactionsDao.groupTransactionTotal(widget.groupId, TransactionType.income);
     StreamSubscription<int?> subscriptionTotalIncome =
-        widget._transactionsDao.groupTransactionTotal(widget.groupId, TransactionType.Income).listen((incomeTotal) {
+        widget._transactionsDao.groupTransactionTotal(widget.groupId, TransactionType.income).listen((incomeTotal) {
       // Update widget with 'incomeTotal' value
       if (mounted) {
         setState(() {
@@ -45,7 +44,7 @@ class _TransactionTotalState extends State<TransactionTotal> {
 
     // expenses subscription
     StreamSubscription<int?> subscriptionTotalExpenses =
-        widget._transactionsDao.groupTransactionTotal(widget.groupId, TransactionType.Expense).listen((expenseTotal) {
+        widget._transactionsDao.groupTransactionTotal(widget.groupId, TransactionType.expense).listen((expenseTotal) {
       // Update widget with 'expenseTotal' value
       if (mounted) {
         setState(() {

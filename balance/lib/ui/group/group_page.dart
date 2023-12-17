@@ -56,11 +56,11 @@ class _GroupPageState extends State<GroupPage> {
                       return Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
-                          _groupAction(context, type: TransactionType.Income),
+                          _groupAction(context, type: TransactionType.income),
                           SizedBox(
                             height: 10.sp,
                           ),
-                          _groupAction(context, type: TransactionType.Expense),
+                          _groupAction(context, type: TransactionType.expense),
                         ],
                       );
                     },
@@ -87,7 +87,7 @@ class _GroupPageState extends State<GroupPage> {
         width: 150.sp,
         child: Expanded(
           child: TextFormField(
-            controller: type == TransactionType.Income ? _incomeController : _expenseController,
+            controller: type == TransactionType.income ? _incomeController : _expenseController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r"[0-9]"))],
             decoration: txtFieldDecor(),
@@ -97,10 +97,10 @@ class _GroupPageState extends State<GroupPage> {
       TextButton(
           onPressed: () {
             switch (type) {
-              case TransactionType.Income:
+              case TransactionType.income:
                 if (_incomeController.text.isEmpty) return;
                 break;
-              case TransactionType.Expense:
+              case TransactionType.expense:
                 if (_expenseController.text.isEmpty) return;
                 break;
             }
@@ -114,16 +114,16 @@ class _GroupPageState extends State<GroupPage> {
               _transactionsDao.insert(
                 widget.groupId,
                 int.parse(
-                  type == TransactionType.Income ? _incomeController.text : _expenseController.text,
+                  type == TransactionType.income ? _incomeController.text : _expenseController.text,
                 ),
                 type,
               );
 
               switch (type) {
-                case TransactionType.Income:
+                case TransactionType.income:
                   _incomeController.clear();
                   break;
-                case TransactionType.Expense:
+                case TransactionType.expense:
                   _expenseController.clear();
                   break;
               }
@@ -168,7 +168,7 @@ class _GroupPageState extends State<GroupPage> {
               isGroupPageLoading = false;
             });
           },
-          child: Text("Add ${type == TransactionType.Income ? 'Income' : 'Expense'}")),
+          child: Text("Add ${type == TransactionType.income ? 'Income' : 'Expense'}")),
     ]);
   }
 

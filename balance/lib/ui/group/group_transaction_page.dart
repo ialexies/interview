@@ -1,7 +1,6 @@
 import 'package:balance/core/database/dao/transactions_dao.dart';
 import 'package:balance/main.dart';
 import 'package:balance/ui/widgets/transaction_list_per_type.dart';
-import 'package:balance/ui/widgets/transaction_total.dart';
 import 'package:flutter/material.dart';
 
 class GroupTransaction extends StatefulWidget {

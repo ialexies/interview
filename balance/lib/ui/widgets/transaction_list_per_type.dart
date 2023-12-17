@@ -54,7 +54,7 @@ class TransactionListPerType extends StatelessWidget {
                         title: Text(
                           transactionType,
                           style: TextStyle(
-                            color: data.transactionType == TransactionType.Expense ? Colors.red : Colors.green,
+                            color: data.transactionType == TransactionType.expense ? Colors.red : Colors.green,
                             fontSize: 15.sp,
                             fontWeight: FontWeight.bold,
                           ),
@@ -97,6 +97,7 @@ class TransactionListPerType extends StatelessWidget {
                                     actions: [
                                       TextButton(
                                         onPressed: () async {
+                                          if (transactionUpdateVal.text.isEmpty) return;
                                           final text = transactionUpdateVal.text;
                                           await _transactionsDao.updateTransaction(
                                             data.id,
