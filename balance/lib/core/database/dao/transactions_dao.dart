@@ -55,4 +55,15 @@ class TransactionssDao extends DatabaseAccessor<Database> with _$TransactionssDa
       ),
     );
   }
+
+  // Function to return sum of all amount of transactions in a group
+  Stream<int> groupTransactionTotalAmount(String groupId) {
+    return (select(transactions)
+          ..where(
+            (tbl) => tbl.groupId.equals(groupId),
+          ))
+        .watch()
+        .map((event) => event.map((e) => e.amount).toList())
+        .map((event) => event.fold<int>(0, (previousValue, element) => previousValue + element));
+  }
 }
